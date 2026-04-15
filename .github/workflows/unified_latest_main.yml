@@ -225,8 +225,24 @@ jobs:
                -n "${{ inputs.display_name }}" \
                -b ${{ inputs.bundle_id }}
 
-      - name: Upload IPA
-        uses: actions/upload-artifact@v4
+      - name: Upload built debs as artifacts
+        uses: actions/upload-artifact@v6
         with:
-          name: YouTubePlus
-          path: YouTubePlus_*.ipa
+          name: built-debs
+          path: |
+            *.deb
+            *.appex
+          if-no-files-found: ignore
+          retention-days: 1
+  
+      - name: Upload to GitHub Releases
+        uses: softprops/action-gh-release@v2.5.0
+        with:
+          tag_name: ytp-${{ github.run_number }}
+          name: YouTubePlus (${{ github.run_number }})
+          files: YouTubePlus.ipa
+          draft: true
+
+      - name: Output Release URL
+        run: |
+          echo "::notice::Release available at: https://github.com/${{ github.repository }}/releases"
