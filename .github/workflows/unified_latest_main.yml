@@ -100,8 +100,13 @@ jobs:
       # ─── YTLITE ───────────────────────────
       - name: Clone YTLite
         run: git clone --quiet https://github.com/dayanch96/YTLite.git "${{ github.workspace }}/YTLite"
+
+      - name: Setup protobuf headers
+        run: |
+          cd "${{ github.workspace }}"
+          git clone --quiet --depth=1 --branch v34.1 https://github.com/protocolbuffers/protobuf.git
         
-      - name: Patch protobuf fix
+      - name: Setup YTNativeShare from source
         run: |
           curl -fLs https://raw.githubusercontent.com/jkhsjdhjs/youtube-native-share/main/Tweak.x \
           -o "${{ github.workspace }}/YTLite/YTNativeShare.x"
