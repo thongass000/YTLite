@@ -1,0 +1,226 @@
+name: Create YouTube Plus (Unified)
+
+on:
+  workflow_dispatch:
+    inputs:
+      enable_youpip:
+        description: "Integrate YouPiP"
+        type: boolean
+        required: true
+        default: true
+      enable_ytuhd:
+        description: "Integrate YTUHD"
+        type: boolean
+        required: true
+        default: true
+      enable_yq:
+        description: "Integrate YouQuality"
+        type: boolean
+        required: true
+        default: true
+      enable_ryd:
+        description: "Integrate Return YouTube Dislikes"
+        type: boolean
+        required: true
+        default: true
+      enable_ytabc:
+        description: "Integrate YTABConfig"
+        type: boolean
+        required: true
+        default: true
+      enable_demc:
+        description: "Integrate DontEatMyContent"
+        type: boolean
+        required: true
+        default: false
+      ipa_url:
+        description: "URL to the decrypted IPA file"
+        required: true
+        type: string
+      display_name:
+        description: "App Name"
+        default: "YouTube"
+        required: true
+        type: string
+      bundle_id:
+        description: "Bundle ID"
+        default: "com.google.ios.youtube"
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      # ─── deps ─────────────────────────────
+      - name: Install dependencies
+        run: brew install make ldid dpkg wget pipx
+
+      - name: Setup PATH
+        run: |
+          echo "$(brew --prefix make)/libexec/gnubin" >> $GITHUB_PATH
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          echo "THEOS=${{ github.workspace }}/theos" >> $GITHUB_ENV
+
+      # ─── THEOS ────────────────────────────
+      - name: Clone Theos
+        run: git clone --quiet --recursive https://github.com/roothide/theos "${{ github.workspace }}/theos"
+
+      - name: Install SDK
+        run: |
+          git clone --quiet -n --depth=1 --filter=tree:0 https://github.com/theos/sdks "${{ github.workspace }}/sdks"
+          cd "${{ github.workspace }}/sdks"
+          git sparse-checkout set --no-cone iPhoneOS16.5.sdk
+          git checkout
+          mv *.sdk "${{ github.workspace }}/theos/sdks"
+
+      # ─── HEADERS ──────────────────────────
+      - name: Clone YouTubeHeader
+        if: ${{ inputs.enable_youpip || inputs.enable_ytuhd || inputs.enable_yq || inputs.enable_ryd || inputs.enable_ytabc || inputs.enable_demc }}
+        run: |
+          cd "$THEOS/include"
+          git clone --quiet --depth=1 https://github.com/PoomSmart/YouTubeHeader.git
+
+          if [ "${{ inputs.enable_demc }}" = "true" ]; then
+            rm -rf "$THEOS/include/YTHeaders"
+            cp -r "$THEOS/include/YouTubeHeader" "$THEOS/include/YTHeaders"
+          fi
+
+      - name: Clone PSHeader
+        if: ${{ inputs.enable_youpip || inputs.enable_ytuhd || inputs.enable_yq || inputs.enable_ryd || inputs.enable_ytabc || inputs.enable_demc }}
+        run: |
+          cd "$THEOS/include"
+          git clone --quiet --depth=1 https://github.com/PoomSmart/PSHeader.git
+
+      - name: Setup roothide
+        run: ln -sf "$THEOS/vendor/include/roothide.h" "$THEOS/include/roothide.h"
+
+      # ─── YTLITE ───────────────────────────
+      - name: Clone YTLite
+        run: git clone --quiet https://github.com/dayanch96/YTLite.git "${{ github.workspace }}/YTLite"
+        
+      - name: Patch protobuf fix
+        run: |
+          curl -fLs https://raw.githubusercontent.com/jkhsjdhjs/youtube-native-share/main/Tweak.x \
+          -o "${{ github.workspace }}/YTLite/YTNativeShare.x"
+
+      - name: Build YTLite
+        run: |
+          cd "${{ github.workspace }}/YTLite"
+          make clean package FINALPACKAGE=1
+          mv packages/*.deb "${{ github.workspace }}/ytlite.deb"
+
+      # ─── COMPANIONS (CLONE) ───────────────
+      - name: Clone YouPiP
+        if: ${{ inputs.enable_youpip }}
+        run: git clone --quiet --depth=1 https://github.com/PoomSmart/YouPiP.git
+
+      - name: Clone YTUHD
+        if: ${{ inputs.enable_ytuhd }}
+        run: git clone --quiet --depth=1 https://github.com/Tonwalter888/YTUHD.git
+
+      - name: Clone Return-YouTube-Dislikes
+        if: ${{ inputs.enable_ryd }}
+        run: git clone --quiet --depth=1 https://github.com/PoomSmart/Return-YouTube-Dislikes.git
+
+      - name: Clone YTABConfig
+        if: ${{ inputs.enable_ytabc }}
+        run: git clone --quiet --depth=1 https://github.com/PoomSmart/YTABConfig.git
+
+      - name: Clone YouGroupSettings
+        if: ${{ inputs.enable_youpip || inputs.enable_ytuhd || inputs.enable_yq || inputs.enable_ryd || inputs.enable_demc }}
+        run: git clone --quiet --depth=1 https://github.com/PoomSmart/YouGroupSettings.git
+
+      - name: Clone YouQuality
+        if: ${{ inputs.enable_yq }}
+        run: git clone --quiet --depth=1 https://github.com/PoomSmart/YouQuality.git
+
+      - name: Clone YTVideoOverlay
+        if: ${{ inputs.enable_yq || inputs.enable_youpip }}
+        run: git clone --quiet --depth=1 https://github.com/PoomSmart/YTVideoOverlay.git
+
+      - name: Clone DontEatMyContent
+        if: ${{ inputs.enable_demc }}
+        run: git clone --quiet --depth=1 https://github.com/therealFoxster/DontEatMyContent.git
+
+      # ─── COMPANIONS (BUILD) ───────────────
+      - name: Build YouPiP
+        if: ${{ inputs.enable_youpip }}
+        run: |
+          cd YouPiP && make clean package FINALPACKAGE=1
+          mv packages/*.deb ../youpip.deb
+
+      - name: Build YTUHD
+        if: ${{ inputs.enable_ytuhd }}
+        run: |
+          cd YTUHD && make clean package FINALPACKAGE=1 ARCHS=arm64
+          mv packages/*.deb ../ytuhd.deb
+
+      - name: Build Return-YouTube-Dislikes
+        if: ${{ inputs.enable_ryd }}
+        run: |
+          cd Return-YouTube-Dislikes && make clean package FINALPACKAGE=1
+          mv packages/*.deb ../ryd.deb
+
+      - name: Build YTABConfig
+        if: ${{ inputs.enable_ytabc }}
+        run: |
+          cd YTABConfig && make clean package FINALPACKAGE=1
+          mv packages/*.deb ../ytabc.deb
+
+      - name: Build YouGroupSettings
+        if: ${{ inputs.enable_youpip || inputs.enable_ytuhd || inputs.enable_yq || inputs.enable_ryd || inputs.enable_demc }}
+        run: |
+          cd YouGroupSettings && make clean package FINALPACKAGE=1
+          mv packages/*.deb ../ygs.deb
+
+      - name: Build YouQuality
+        if: ${{ inputs.enable_yq }}
+        run: |
+          cd YouQuality && make clean package FINALPACKAGE=1
+          mv packages/*.deb ../yq.deb
+
+      - name: Build YTVideoOverlay
+        if: ${{ inputs.enable_yq || inputs.enable_youpip }}
+        run: |
+          cd YTVideoOverlay && make clean package FINALPACKAGE=1
+          mv packages/*.deb ../ytvo.deb
+
+      - name: Build DontEatMyContent
+        if: ${{ inputs.enable_demc }}
+        run: |
+          cd DontEatMyContent && make clean package FINALPACKAGE=1
+          mv packages/*.deb ../demc.deb
+
+      # ─── SAFARI EXTENSION ─────────────────
+      - name: Clone Safari extension
+        run: |
+          git clone --quiet -n --depth=1 --filter=tree:0 https://github.com/BillyCurtis/OpenYouTubeSafariExtension
+          cd OpenYoutubeSafariExtension
+          git sparse-checkout set --no-cone OpenYoutubeSafariExtension.appex
+          git checkout
+          mv OpenYoutubeSafariExtension.appex ..
+
+      # ─── IPA ──────────────────────────────
+      - name: Download IPA
+        run: wget "${{ inputs.ipa_url }}" -O youtube.ipa
+
+      - name: Install cyan
+        run: pipx install --force https://github.com/asdfzxcvbn/pyzule-rw/archive/main.zip
+
+      - name: Inject tweaks
+        run: |
+          tweaks="OpenYoutubeSafariExtension.appex *.deb"
+
+          cyan -i youtube.ipa \
+               -o YouTubePlus.ipa \
+               -uwef $tweaks \
+               -n "${{ inputs.display_name }}" \
+               -b ${{ inputs.bundle_id }}
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: YouTubePlus
+          path: YouTubePlus_*.ipa
