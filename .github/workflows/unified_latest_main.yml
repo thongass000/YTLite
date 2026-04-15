@@ -103,7 +103,7 @@ jobs:
 
       - name: Setup protobuf headers
         run: |
-          cd "${{ github.workspace }}"
+          cd "${{ github.workspace }}/YTLite"
           git clone --quiet --depth=1 --branch v34.1 https://github.com/protocolbuffers/protobuf.git
         
       - name: Setup YTNativeShare from source
