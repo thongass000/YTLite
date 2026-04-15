@@ -81,6 +81,7 @@ jobs:
         run: |
           cd "$THEOS/include"
           git clone --quiet --depth=1 https://github.com/PoomSmart/YouTubeHeader.git
+          cp -rf "./YouTubeHeader" "${{ github.workspace }}/YouTubeHeader"
 
           if [ "${{ inputs.enable_demc }}" = "true" ]; then
             rm -rf "$THEOS/include/YTHeaders"
