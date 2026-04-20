@@ -250,6 +250,8 @@
 "PreserveSpeedDesc" = "Conserva la velocidad ajustada después de completar el gesto";
 "SeekAnywhere" = "Deslizar para buscar";
 "SeekAnywhereDesc" = "Permite controlar la búsqueda de la reproducción deslizando hacia la izquierda y la derecha.";
+"SeekAnywhereFeed" = "Seek in feed player";
+"SeekAnywhereFeedDesc" = "Swipe left or right on feed videos to seek.";
 "SeekMethod" = "Método de búsqueda";
 "SeekMethodDesc" = "Independiente: Desplazamiento libre y rápido a lo largo de toda la duración del vídeo. Solo se respeta la sensibilidad de búsqueda.\n\nBasado en la duración: La fuerza del desplazamiento dependerá de la longitud del vídeo y la sensibilidad de búsqueda. Esto puede ser útil para vídeos largos para evitar el desplazamiento a través de grandes secciones del vídeo.";
 "Independent" = "Independiente";
@@ -404,6 +406,9 @@
 
 "StartupAnimation" = "Animación de inicio";
 "StartupAnimationDesc" = "Muestra la animación de carga de inicio de YouTube";
+"SelectCustomAnimation" = "Select custom animation";
+"VideoTooLong" = "Video must not exceed 10 seconds";
+"MediaNotFound" = "Media not found";
 
 "InterfaceStyle" = "Estilo de la interfaz";
 
@@ -590,7 +595,6 @@
 "Polish" = "Traducción: Polaco";
 
 "OpenSourceLibs" = "Bibliotecas de código abierto";
-"SupporterWall" = "Partidarios";
 
 "Preferences" = "%@ preferencias";
 "ManagePreferences" = "Gestión de preferencias";
@@ -726,19 +730,3 @@
 "Conflicts.CloseYT" = "Cerrar YouTube";
 
 "DonationReminder" = "Tu apoyo ayuda a mejorar YouTube Plus.\n\nPuedes contribuir o elegir desactivar estas notificaciones en los ajustes de YouTube Plus. ¡Gracias💜!";
-
-/* Old localizations (commented out for reference)
-"ExtraSpeedOptions" = "Opciones adicionales de velocidad";
-"ExtraSpeedOptionsDesc" = "Agrega más opciones de velocidad de reproducción de vídeo al menú del reproductor.";
-"CastingErrorTitle" = "Espera un momento...";
-"CastingErrorMessage" = "Lo màs probable es que estés viendo esto porque tu certificado no tiene permisos de Multicast.";
-"CastingAction" = "Ajustes";
-"OpenSettings" = "Abrir ajustes";
-"WhatIsMulticast?" = "¿Qué es Multicast?";
-"NoYTLogo" = "Eliminar el logo de YouTube";
-"NoYTLogoDesc" = "Elimina el logo de YouTube de la barra de navegación.";
-"PremiumYTLogo" = "Establece el logotipo Premium de YouTube";
-"PremiumYTLogoDesc" = "Establece el logotipo de YouTube Premium en la barra de navegación.";
-"SpeedLocation" = "Ubicación de activación";
-"TabIsHidden" = "No se puede seleccionar una pestaña oculta como página de inicio";
-"TabIsStartupTab" = "La pestaña seleccionada como página de inicio no puede estar oculta";
